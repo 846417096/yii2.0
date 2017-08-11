@@ -9,6 +9,7 @@
 namespace frontend\controllers;
 
 
+use frontend\controllers\controller\BaseController;
 use frontend\models\GSignupForm;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -16,7 +17,7 @@ use frontend\models\GroupSearch;
 use common\models\HttpRequest;
 use frontend\models\User;
 
-class GroupController extends Controller
+class GroupController extends BaseController
 {
     /*
      * 显示所有组织
@@ -59,8 +60,12 @@ class GroupController extends Controller
     public function actionMygroup()
     {
         $id = \Yii::$app->user->getId();
-        $data = HttpRequest::request('user-groups/' . $id . '?type=user');
-        $data = json_decode($data, true);
+        $data = self::GetDate('Mygroup');
+        if (empty($data)) {
+            $data = self::GET('user-groups/' . $id . '?type=user');
+            $data = json_decode($data, true);
+            self::createCache($id,'Mygroup',$data);
+        }
         if ($this->checkArray($data)) {
             if ($data['message'] == '此用户未加入任何组织') {
                 return $this->render('index', ['data' => null]);
@@ -149,23 +154,24 @@ class GroupController extends Controller
         HttpRequest::request('groups', 'DELETE', $data);
         return $this->actionMygroup();
     }
-/*
-    public function checkmember($gid)
-    {
-        $id = \Yii::$app->user->getId();
-        $users = HttpRequest::request('user-groups/' . $id . '/?group_id=' . $gid);
-        $state = ArrayHelper::getValue($users, 'message');
-        if ($state == 'success') {
-            $member = ArrayHelper::getValue($users, 'data');
-            if (!empty($member)) {
-                return true;
+
+    /*
+        public function checkmember($gid)
+        {
+            $id = \Yii::$app->user->getId();
+            $users = HttpRequest::request('user-groups/' . $id . '/?group_id=' . $gid);
+            $state = ArrayHelper::getValue($users, 'message');
+            if ($state == 'success') {
+                $member = ArrayHelper::getValue($users, 'data');
+                if (!empty($member)) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 return false;
             }
-        } else {
-            return false;
-        }
-    }*/
+        }*/
 
     public function checkState($data = [])
     {

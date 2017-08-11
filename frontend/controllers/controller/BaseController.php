@@ -95,9 +95,19 @@ class BaseController extends Controller
     public static function createCache($id, $type, $data)
     {
         $cache = \Yii::$app->cache;
-        $data[$type] = $data;
-        $data = $cache->get($id);
-        return $cache->set($id, $data[$type]);
+        $need = $cache->get($id);
+        $need[$type] = $data;
+
+        var_dump($need);
+        die();
+        if ($cache->get($id)) {
+            return $cache->set($id, $need[$type], 60 * 60);
+        } else {
+
+            var_dump($need);
+            die();
+        }
+
     }
 
 }
